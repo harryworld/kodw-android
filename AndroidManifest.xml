@@ -9,7 +9,8 @@
         android:targetSdkVersion="19" />
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <application android:icon="@drawable/ic_launcher">
+    <application android:icon="@drawable/ic_launcher"
+        android:name=".app.App">
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
