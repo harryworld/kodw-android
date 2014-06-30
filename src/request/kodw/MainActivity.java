@@ -11,9 +11,6 @@ import android.webkit.WebViewClient;
 import android.widget.TextView;
 
 import com.royalnext.base.activity.BaseActivity;
-import com.royalnext.base.util.network.ApiCache;
-import com.royalnext.base.util.network.ServerTaskListener;
-import com.royalnext.base.util.network.ServerTaskManager;
 
 import java.util.HashMap;
 
@@ -23,12 +20,15 @@ public class MainActivity extends BaseActivity {
     private TextView scheduleView;
     private TextView iBeaconView;
     public String deviceId;
+    public String appKey;
+    public static final String webSite = "http://www.thegaragesociety.com/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState, R.layout.activity_main);
         // Start coding here
 
+        appKey = "jdFYjuCqWyCdrywPT";
         // Generate deviceId
         deviceId = Settings.Secure.getString(getBaseContext().getContentResolver(), Settings.Secure.ANDROID_ID);
         Log.d("KODW", "Device ID: " + deviceId);
@@ -36,23 +36,7 @@ public class MainActivity extends BaseActivity {
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("deviceId", deviceId);
         params.put("username", deviceId);
-        params.put("appId", "jnFcGCugEqTXpTu66");
-
-        stm.startTask("http://api.homesmartly.com:8080/collectionapi/members", params, new ServerTaskListener() {
-            @Override
-            public void onStart() {
-            }
-
-            @Override
-            public void onSuccess(String result) {
-                Log.d("KODW", "Success: " + result);
-            }
-
-            @Override
-            public void onError(String result, String code, String msg) {
-                Log.d("KODW", "Error code: " + code + " / " + msg);
-            }
-        }, ApiCache.FLAG_NO_CACHE, ServerTaskManager.GET_TYPE, null);
+        params.put("appKey", appKey);
 
         // Shared WebView
         webView = (WebView) findViewById(R.id.webView);
@@ -70,7 +54,7 @@ public class MainActivity extends BaseActivity {
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
-                showLoading();
+//                showLoading();
             }
 
             @Override
@@ -79,13 +63,13 @@ public class MainActivity extends BaseActivity {
                 hideLoading();
             }
         });
-        webView.loadUrl("http://mobile.kodw.org/");
+        webView.loadUrl(webSite);
 
         scheduleView = (TextView) findViewById(R.id.schedule);
         scheduleView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                webView.loadUrl("http://mobile.kodw.org/");
+                webView.loadUrl(webSite);
             }
         });
 
@@ -93,7 +77,7 @@ public class MainActivity extends BaseActivity {
         iBeaconView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                webView.loadUrl("http://www.homesmartly.com/mobile/" + deviceId);
+                webView.loadUrl("http://www.homesmartly.com/app/" + appKey + "/" + deviceId);
             }
         });
     }
