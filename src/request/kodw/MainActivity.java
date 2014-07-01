@@ -2,6 +2,7 @@ package request.kodw;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
@@ -10,9 +11,16 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.TextView;
 
+import com.estimote.sdk.Beacon;
+import com.estimote.sdk.BeaconManager;
+import com.estimote.sdk.Region;
 import com.royalnext.base.activity.BaseActivity;
+import com.royalnext.base.util.Common;
 
 import java.util.HashMap;
+import java.util.List;
+
+import request.kodw.app.App;
 
 public class MainActivity extends BaseActivity {
 
@@ -22,6 +30,11 @@ public class MainActivity extends BaseActivity {
     public String deviceId;
     public String appKey;
     public static final String webSite = "http://www.thegaragesociety.com/";
+
+    private static final String ESTIMOTE_PROXIMITY_UUID = "B9407F30-F5F8-466E-AFF9-25556B57FE6D";
+    private static final Region ALL_ESTIMOTE_BEACONS = new Region("regionId", ESTIMOTE_PROXIMITY_UUID, null, null);
+
+    private BeaconManager beaconManager = new BeaconManager(App.me);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +93,38 @@ public class MainActivity extends BaseActivity {
                 webView.loadUrl("http://www.homesmartly.com/app/" + appKey + "/" + deviceId);
             }
         });
+
+
+        // BeaconManager
+        // Should be invoked in #onCreate.
+        beaconManager.setRangingListener(new BeaconManager.RangingListener() {
+            @Override
+            public void onBeaconsDiscovered(Region region, List<Beacon> beacons) {
+                Common.d("Ranged beacons: " + beacons);
+            }
+        });
+
+        // Should be invoked in #onStart.
+        beaconManager.connect(new BeaconManager.ServiceReadyCallback() {
+            @Override
+            public void onServiceReady() {
+                try {
+                    beaconManager.startRanging(ALL_ESTIMOTE_BEACONS);
+                } catch (RemoteException e) {
+                    Common.e("Cannot start ranging" + e);
+                }
+            }
+        });
+
+        // Should be invoked in #onStop.
+        try {
+            beaconManager.stopRanging(ALL_ESTIMOTE_BEACONS);
+        } catch (RemoteException e) {
+            Common.e("Cannot stop but it does not matter now" + e);
+        }
+
+        // When no longer needed. Should be invoked in #onDestroy.
+        beaconManager.disconnect();
     }
 
 
